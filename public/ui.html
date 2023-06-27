@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Air quality demo</title>
+    <meta name="description" content="An air quality demonstration">
+    <link rel="stylesheet" href="ui.css">
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+
+<body>
+    <button onclick="fetchData()">RELOAD</button>
+
+    <div id="myPlot" style="width:100%;max-width:700px"></div>
+</body>
+
+<script>
+    window.onload = function() {
+        fetchData();
+    };
+
+    setInterval(function() {
+        // Your function code here
+        console.log("30s update...");
+        fetchData();
+
+    }, 30000);
+
+    function drawPlot(id, co2, voc) {
+        console.log("drawing...");
+
+        //console.log(x);
+        //console.log(y);
+
+        const idArray = id;
+        const coArray = co2;
+        const vocArray = voc;
+
+        console.log(vocArray);
+
+        //console.log(xArray);
+        //console.log(yArray);
+
+        //debugger;
+
+        // Define Data
+        const data = [{
+            x: idArray,
+            y: coArray,
+            name: "CO2 [ppm]",
+            mode: "lines"
+        },
+        {
+            x: idArray,
+            y: vocArray,
+            name: "TVOC [ppb]",
+            mode: "lines"
+        }];
+
+        // Define Layout
+        const layout = {
+            xaxis: { range: [Math.min(idArray), Math.max(idArray)], title: "id" },
+            yaxis: { range: [0, Math.max(coArray)], title: "co2 + voc" },
+            title: "Air quality"
+        };
+
+        // Display using Plotly
+        Plotly.newPlot("myPlot", data, layout);
+    }
+
+    function fetchData() {
+        fetch('http://localhost:8000/data')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+
+                var idData = new Array();
+                var coData = new Array();
+                var vocData = new Array();
+
+                for (const datapoint of data) {
+                    idData.push(datapoint.id);
+                    coData.push(datapoint.co2);
+                    vocData.push(datapoint.tvoc);
+                }
+
+                drawPlot(idData, coData, vocData);
+            })
+            .catch(error => {
+                console.error('Error retrieving posts:', error);
+            });
+    }
+
+</script>
+
+</html>
